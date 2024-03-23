@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const authRoutes = require("./routes/authRoutes.js");
+const userRoutes = require("./routes/userRoutes.js");
 
 
 const bodyParser = require("body-parser");
@@ -9,7 +9,7 @@ const cors = require("cors");
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
-app.use("/api/auth", authRoutes);
+app.use("/", userRoutes);
 
 
 
