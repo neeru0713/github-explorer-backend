@@ -1,6 +1,5 @@
 const { User } = require("../models/User");
-const GITHUB_TOKEN =
-  "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";
+const { GITHUB_TOKEN } = require('../config/config.js');
 const express = require("express");
 const router = express.Router();
 
