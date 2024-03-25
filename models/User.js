@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 // TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS - Complete userSchema, a Mongoose schema for "users" collection
 const userSchema = mongoose.Schema({
-  userName: {
+  username: {
     type: String,
   },
   id: {
