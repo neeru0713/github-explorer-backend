@@ -80,4 +80,12 @@ router.get("/search-users", async (req, res) => {
   }
 });
 
+router.delete("/delete-user/:username", async (req, res) => {
+  const username = req.params.username;
+  const user = await User.findOne({ username });
+  user.isDeleted = true;
+  await user.save();
+  res.status(200).json({ user });
+});
+
 module.exports = router;

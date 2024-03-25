@@ -49,6 +49,10 @@ const userSchema = mongoose.Schema({
   },
   friends: {
     type: Array,
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false 
   }
 });
 
