@@ -11,9 +11,6 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use("/", userRoutes);
 
-
-
-
 mongoose
   .connect(
     "mongodb+srv://neerurani1307:%40Neeru1307@neerucluster.z4krrc9.mongodb.net/githubExplorerBackend?retryWrites=true&w=majority",

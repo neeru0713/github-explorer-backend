@@ -1,136 +1,125 @@
 const { User } = require("../models/User");
-const { GITHUB_TOKEN } = require("../config/config.js");
 const express = require("express");
 const router = express.Router();
+const userController = require('../controllers/userController.js');
 
-router.get("/save-user/:username", async (req, res) => {
-  const username = req.params.username;
 
-  const userExists = await User.findOne({ username });
-  console.log(userExists);
-  if (userExists) {
-    res.status(200).json({ message: "User alerady exists" });
-  } else {
-    let response = await fetch(`https://api.github.com/users/${username}`);
-    response = await response.json();
-    response.username = username;
-    const user = new User(response);
-    const userDetails = await user.save();
-    console.log(userDetails);
-    res.status(201).json({ userDetails });
-  }
-});
 
-router.get("/find-mutual-followers/:username", async (req, res) => {
-  const username = req.params.username;
-  const user = await User.findOne({ username });
-  user.friends = [];
-  let savedUser = user;
-  await user.save();
 
-  const headers = {
-    Authorization: `Bearer ${GITHUB_TOKEN}`,
-  };
+router.get("/save-user/:username", userController.saveUser);
 
-  let response = await fetch(
-    `https://api.github.com/users/${username}/followers`,
-    { headers }
-  );
+router.get("/find-mutual-followers/:username", userController.findMutualFollowers);
+// router.get("/find-mutual-followers/:username", async (req, res) => {
+//   const username = req.params.username;
+//   const user = await User.findOne({ username });
+//   user.friends = [];
+//   let savedUser = user;
+//   await user.save();
 
-  response = await response?.json();
+//   const headers = {
+//     Authorization: `Bearer ${GITHUB_TOKEN}`,
+//   };
 
-  const promises = response?.map(async (item) => {
-    const isFollowingRes = await fetch(
-      `https://api.github.com/users/${username}/following/${item.login}`,
-      { headers }
-    );
-    if (isFollowingRes.status === 204) {
-      item.username = item.login;
-      user.friends.push(item);
-    } else if (isFollowingRes.status === 404) {
-      user.friends = user.friends.filter(
-        (friend) => friend.username !== item.login
-      );
-    }
-  });
-  await Promise.all(promises);
+//   let response = await fetch(
+//     `https://api.github.com/users/${username}/followers`,
+//     { headers }
+//   );
 
-  savedUser = await user.save();
+//   response = await response?.json();
+//   console.log("aaaaaaaaa", response)
 
-  return res.status(200).json({ user: savedUser });
-});
+//   const promises = response?.map(async (item) => {
+//     const isFollowingRes = await fetch(
+//       `https://api.github.com/users/${username}/following/${item.login}`,
+//       { headers }
+//     );
+//     if (isFollowingRes.status === 204) {
+//       item.username = item.login;
+//       user.friends.push(item);
+//     } else if (isFollowingRes.status === 404) {
+//       user.friends = user.friends.filter(
+//         (friend) => friend.username !== item.login
+//       );
+//     }
+//   });
+//   await Promise.all(promises);
 
-router.get("/search-users", async (req, res) => {
-  try {
-    const searchQueryKeys = Object.keys(req.query);
+//   savedUser = await user.save();
 
-    const searchQuery = {};
+//   return res.status(200).json({ user: savedUser });
+// });
 
-    searchQueryKeys.forEach((item) => {
-      const val = req.query[item];
-      searchQuery[item] = val;
-    });
-    // myobj.name
-    // myobj[item]
-    const searchResults = await User.find(searchQuery);
-    res.status(200).json({ users: searchResults });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+// router.get("/search-users", async (req, res) => {
+//   try {
+//     const searchQueryKeys = Object.keys(req.query);
 
-router.delete("/delete-user/:username", async (req, res) => {
-  const username = req.params.username;
-  const user = await User.findOne({ username });
-  user.isDeleted = true;
-  await user.save();
-  res.status(200).json({ user });
-});
+//     const searchQuery = {};
 
-router.patch("/update-user/:username", async (req, res) => {
-  try {
-    const username = req.params.username;
-    console.log(username);
-    const updates = req.body;
-    console.log(req.body);
-    const updatedUser = await User.findOneAndUpdate(
-      { username: username },
-      { $set: updates },
-      { new: true }
-    );
-    console.log(updatedUser);
-    if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
-    }
+//     searchQueryKeys.forEach((item) => {
+//       const val = req.query[item];
+//       searchQuery[item] = val;
+//     });
+//     // myobj.name
+//     // myobj[item]
+//     const searchResults = await User.find(searchQuery);
+//     res.status(200).json({ users: searchResults });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
 
-    return res.status(200).json({ user: updatedUser });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+// router.delete("/delete-user/:username", async (req, res) => {
+//   const username = req.params.username;
+//   const user = await User.findOne({ username });
+//   user.isDeleted = true;
+//   await user.save();
+//   res.status(200).json({ user });
+// });
 
-router.get("/list-users", async (req, res) => {
-  try {
-    let users = await User.find({isDeleted: false});
-    const fieldUsedForSorting = req.query.sortBy;
+// router.patch("/update-user/:username", async (req, res) => {
+//   try {
+//     const username = req.params.username;
+//     console.log(username);
+//     const updates = req.body;
+//     console.log(req.body);
+//     const updatedUser = await User.findOneAndUpdate(
+//       { username: username },
+//       { $set: updates },
+//       { new: true }
+//     );
+//     console.log(updatedUser);
+//     if (!updatedUser) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
 
-    if (fieldUsedForSorting) {
-        console.log("Before sorting : ", users)
+//     return res.status(200).json({ user: updatedUser });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
 
-      users = users.sort((a, b) => {
-        if (a[fieldUsedForSorting] < b[fieldUsedForSorting]) return 1;
-        if (a[fieldUsedForSorting] > b[fieldUsedForSorting]) return -1;
-      });
+// router.get("/list-users", async (req, res) => {
+//   try {
+//     let users = await User.find({isDeleted: false});
+//     const fieldUsedForSorting = req.query.sortBy;
 
-      console.log("After sorting : ", users)
-    }
-    return res.status(200).json({ users });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+//     if (fieldUsedForSorting) {
+//         console.log("Before sorting : ", users)
+
+//       users = users.sort((a, b) => {
+//         if (a[fieldUsedForSorting] < b[fieldUsedForSorting]) return 1;
+//         if (a[fieldUsedForSorting] > b[fieldUsedForSorting]) return -1;
+//       });
+
+//       console.log("After sorting : ", users)
+//     }
+//     return res.status(200).json({ users });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
 
 module.exports = router;
