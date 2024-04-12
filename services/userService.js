@@ -1,6 +1,5 @@
 const { User } = require("../models/User");
-const { GITHUB_TOKEN } = require("../config/config.js");
-
+require('dotenv').config();
 
 async function saveUser(username) {
   const userExists = await User.findOne({ username });
@@ -24,7 +23,7 @@ async function findMutualFollowers(username) {
     return null;
   }
   const headers = {
-    Authorization: `Bearer ${GITHUB_TOKEN}`,
+    Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
   };
 
   let response = await fetch(
