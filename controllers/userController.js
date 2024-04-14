@@ -3,8 +3,10 @@ const { User } = require("../models/User");
 
 async function saveUser(req, res) {
   try {
+    // extract username from params and pass to service method
     const username = req.params.username;
     const savedUserRes = await userService.saveUser(username);
+    // handle response based on success flag
     if (savedUserRes.success) {
       res.status(201).json(savedUserRes);
     } else {
@@ -33,7 +35,8 @@ async function findMutualFollowers(req, res) {
 async function searchUsers(req, res) {
   try{
   const searchQueryKeys = Object.keys(req.query);
-
+  // extract the query params from api path and push to searchQuery object
+  // this obj can be used as a filter obj in mongo query 
   const searchQuery = {};
 
   searchQueryKeys.forEach((item) => {
