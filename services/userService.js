@@ -1,19 +1,31 @@
 const { User } = require("../models/User");
-require('dotenv').config();
+require("dotenv").config();
 
 async function saveUser(username) {
   const userExists = await User.findOne({ username });
-  console.log(userExists);
+  const result = {};
   if (userExists) {
-    return null;
+    result.success = false;
+    result.message = "User already exists";
+    result.user = userExists;
+    return result;
   } else {
     let response = await fetch(`https://api.github.com/users/${username}`);
     response = await response.json();
-    console.log("1234", response);
-    response.username = username;
-    const user = new User(response);
-    const userDetails = await user.save();
-    return userDetails;
+    if (response?.login) {
+      response.username = username;
+      const user = new User(response);
+      const userDetails = await user.save();
+      result.success = true;
+      result.message = "User created successfuly";
+      result.user = userDetails;
+      return result;
+    } else {
+      result.success = false;
+      result.message = "User does not exist in github";
+      result.user = null;
+      return result;
+    }
   }
 }
 
@@ -43,7 +55,7 @@ async function findMutualFollowers(username) {
       { headers }
     );
     if (isFollowingRes.ok) {
-      mutualFollowers.push( { ...follower, username: follower.login });
+      mutualFollowers.push({ ...follower, username: follower.login });
     }
   });
   await Promise.all(promises);
@@ -55,10 +67,9 @@ async function findMutualFollowers(username) {
   return savedUser;
 }
 
-
 async function searchUsers(searchQuery) {
   const searchResults = await User.find(searchQuery);
-  
+
   if (!searchResults) {
     throw new Error("Error searching users");
   } else {
@@ -66,9 +77,51 @@ async function searchUsers(searchQuery) {
   }
 }
 
+async function deleteUser(username) {
+  const user = await User.findOne({ username });
+  if (!user) {
+    throw new Error("User not found");
+  }
+  user.isDeleted = true;
+  await user.save();
+  return user;
+}
+
+async function updateUser(username, updates) {
+  const updatedUser = await User.findOneAndUpdate(
+    { username: username },
+    { $set: updates },
+    { new: true }
+  );
+  if (!updatedUser) {
+    throw new Error("User not found");
+  }
+  return updatedUser;
+}
+
+async function listUsers(sortBy) {
+  try {
+    let users = await User.find({ isDeleted: false });
+
+    if (sortBy) {
+      users = users.sort((a, b) => {
+        if (a[sortBy] < b[sortBy]) return 1;
+        if (a[sortBy] > b[sortBy]) return -1;
+        return 0;
+      });
+    }
+
+    return users;
+  } catch (error) {
+    throw new Error("Error listing users");
+  }
+}
 
 module.exports = {
   saveUser,
   findMutualFollowers,
-  searchUsers
+  searchUsers,
+  deleteUser,
+  updateUser,
+  listUsers,
 };
