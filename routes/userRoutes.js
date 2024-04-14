@@ -9,45 +9,9 @@ const userController = require('../controllers/userController.js');
 router.get("/save-user/:username", userController.saveUser);
 
 router.get("/find-mutual-followers/:username", userController.findMutualFollowers);
-// router.get("/find-mutual-followers/:username", async (req, res) => {
-//   const username = req.params.username;
-//   const user = await User.findOne({ username });
-//   user.friends = [];
-//   let savedUser = user;
-//   await user.save();
 
-//   const headers = {
-//     Authorization: `Bearer ${GITHUB_TOKEN}`,
-//   };
+router.get("/search-users", userController.searchUsers);
 
-//   let response = await fetch(
-//     `https://api.github.com/users/${username}/followers`,
-//     { headers }
-//   );
-
-//   response = await response?.json();
-//   console.log("aaaaaaaaa", response)
-
-//   const promises = response?.map(async (item) => {
-//     const isFollowingRes = await fetch(
-//       `https://api.github.com/users/${username}/following/${item.login}`,
-//       { headers }
-//     );
-//     if (isFollowingRes.status === 204) {
-//       item.username = item.login;
-//       user.friends.push(item);
-//     } else if (isFollowingRes.status === 404) {
-//       user.friends = user.friends.filter(
-//         (friend) => friend.username !== item.login
-//       );
-//     }
-//   });
-//   await Promise.all(promises);
-
-//   savedUser = await user.save();
-
-//   return res.status(200).json({ user: savedUser });
-// });
 
 // router.get("/search-users", async (req, res) => {
 //   try {

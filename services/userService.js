@@ -55,7 +55,20 @@ async function findMutualFollowers(username) {
   return savedUser;
 }
 
+
+async function searchUsers(searchQuery) {
+  const searchResults = await User.find(searchQuery);
+  
+  if (!searchResults) {
+    throw new Error("Error searching users");
+  } else {
+    return searchResults;
+  }
+}
+
+
 module.exports = {
   saveUser,
   findMutualFollowers,
+  searchUsers
 };
