@@ -1,7 +1,6 @@
 const userService = require("../services/userService");
 const { User } = require("../models/User");
 
-
 async function saveUser(req, res) {
   try {
     const username = req.params.username;
@@ -32,7 +31,31 @@ async function findMutualFollowers(req, res) {
   }
 }
 
+async function searchUsers(req, res) {
+  try{
+  const searchQueryKeys = Object.keys(req.query);
+
+  const searchQuery = {};
+
+  searchQueryKeys.forEach((item) => {
+    const val = req.query[item];
+    searchQuery[item] = val;
+  });
+
+  const searchResults = await userService.searchUsers(searchQuery);
+  res.status(200).json({ users: searchResults });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+}
+}
+
+
+
+
+
 module.exports = {
   saveUser,
   findMutualFollowers,
+  searchUsers,
 };
